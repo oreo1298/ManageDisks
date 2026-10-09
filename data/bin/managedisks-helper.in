@@ -1,0 +1,10 @@
+#!@PYTHON@ -I
+# ManageDisks privileged helper. Started by the GUI through pkexec; speaks
+# JSON lines on stdin/stdout. Not meant to be run by hand.
+import sys
+
+sys.path.insert(0, "@PKGDATADIR@")
+
+from managedisks.helper.server import main  # noqa: E402
+
+sys.exit(main())

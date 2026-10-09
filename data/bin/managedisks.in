@@ -1,0 +1,9 @@
+#!@PYTHON@
+# ManageDisks graphical interface
+import sys
+
+sys.path.insert(0, "@PKGDATADIR@")
+
+from managedisks.gui.app import main  # noqa: E402
+
+sys.exit(main())

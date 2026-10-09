@@ -1,0 +1,1 @@
+"""Qt graphical user interface."""

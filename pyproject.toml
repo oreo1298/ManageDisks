@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "managedisks"
+dynamic = ["version"]
+description = "Modern disk and partition manager for Linux (GUI + diskpart-style CLI)"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.9"
+classifiers = [
+  "Environment :: X11 Applications :: Qt",
+  "Operating System :: POSIX :: Linux",
+  "Topic :: System :: Filesystems",
+  "Programming Language :: Python :: 3",
+]
+
+[project.optional-dependencies]
+gui = ["PySide6>=6.2"]
+test = ["pytest"]
+
+[project.scripts]
+managedisks-cli = "managedisks.cli.main:main"
+
+[project.gui-scripts]
+managedisks = "managedisks.gui.app:main"
+
+[project.urls]
+Homepage = "https://github.com/oreo1298/managedisks"
+
+[tool.setuptools.dynamic]
+version = { attr = "managedisks.__version__" }
+
+[tool.setuptools.packages.find]
+include = ["managedisks*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

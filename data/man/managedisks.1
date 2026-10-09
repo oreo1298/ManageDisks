@@ -1,0 +1,43 @@
+.TH MANAGEDISKS 1 "2026-10-09" "ManageDisks 1.0.0" "User Commands"
+.SH NAME
+managedisks \- graphical disk and partition manager
+.SH SYNOPSIS
+.B managedisks
+[\fB\-\-unlock\fR] [\fB\-\-loop\fR] [\fB\-\-scheme\fR \fIsystem\fR|\fIlight\fR|\fIdark\fR]
+.SH DESCRIPTION
+.B managedisks
+shows every disk with a proportional map of its partitions and lets you
+create, delete, format, resize, move, copy and check partitions, change
+labels, types and flags, convert between MBR and GPT, wipe disks, inspect
+drive health (S.M.A.R.T.), run surface tests, clone disks and write or create
+disk images.
+.PP
+Changes are queued as pending operations and previewed before anything is
+written. Nothing touches a disk until you press \fBApply\fR.
+.PP
+The window runs as your normal user. Administrator rights are requested
+through polkit (pkexec) only when needed: when you press \fBUnlock\fR or
+apply changes.
+.SH OPTIONS
+.TP
+.B \-\-unlock
+Ask for administrator rights immediately at startup.
+.TP
+.B \-\-loop
+Show loop devices (disk images attached with losetup).
+.TP
+.BI \-\-scheme " mode"
+Override the color scheme. The default follows the desktop.
+.SH FILES
+.TP
+.I ~/.config/ManageDisks/ManageDisks.conf
+Window layout and preferences.
+.TP
+.I /var/log/managedisks/operations.log
+Record of every operation that was applied.
+.SH SEE ALSO
+.BR managedisks-cli (1),
+.BR sfdisk (8),
+.BR mkfs (8),
+.BR cryptsetup (8),
+.BR smartctl (8)

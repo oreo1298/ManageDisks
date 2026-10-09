@@ -1,0 +1,19 @@
+[Desktop Entry]
+Type=Application
+Name=ManageDisks
+GenericName=Partition Manager
+Comment=Manage disks, partitions and filesystems
+Exec=managedisks %U
+TryExec=managedisks
+Icon=io.github.oreo1298.ManageDisks
+Terminal=false
+Categories=System;Filesystem;Utility;Qt;
+Keywords=disk;partition;format;resize;gparted;diskpart;disk management;filesystem;ext4;ntfs;btrfs;usb;clone;smart;
+StartupNotify=true
+StartupWMClass=managedisks
+SingleMainWindow=true
+Actions=unlock;
+
+[Desktop Action unlock]
+Name=Start Unlocked (Administrator)
+Exec=managedisks --unlock

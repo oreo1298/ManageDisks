@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.oreo1298.ManageDisks</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>ManageDisks</name>
+  <summary>Manage disks, partitions and filesystems</summary>
+  <description>
+    <p>
+      ManageDisks is a modern, fast partition manager for Linux. It combines the
+      visual overview of a disk management console with the power tools of a
+      partition editor and an interactive command line.
+    </p>
+    <ul>
+      <li>Create, delete, format, resize and move partitions with a live preview</li>
+      <li>Queue operations, undo them and apply everything at once</li>
+      <li>ext4, Btrfs, XFS, F2FS, FAT, exFAT, NTFS, swap and LUKS encryption</li>
+      <li>Convert between MBR and GPT without losing data</li>
+      <li>Copy partitions, clone disks, write and create disk images</li>
+      <li>Drive health (S.M.A.R.T.) and surface tests</li>
+      <li>Follows the system light/dark theme and accent color</li>
+    </ul>
+  </description>
+  <launchable type="desktop-id">io.github.oreo1298.ManageDisks.desktop</launchable>
+  <url type="homepage">https://github.com/oreo1298/managedisks</url>
+  <url type="bugtracker">https://github.com/oreo1298/managedisks/issues</url>
+  <developer id="io.github.oreo1298">
+    <name>ManageDisks contributors</name>
+  </developer>
+  <screenshots>
+    <screenshot type="default">
+      <caption>Disk overview</caption>
+      <image>https://raw.githubusercontent.com/oreo1298/managedisks/main/docs/screenshots/main-light.png</image>
+    </screenshot>
+  </screenshots>
+  <content_rating type="oars-1.1"/>
+  <provides>
+    <binary>managedisks</binary>
+    <binary>managedisks-cli</binary>
+  </provides>
+  <releases>
+    <release version="1.0.0" date="2026-10-09">
+      <description>
+        <p>First release.</p>
+      </description>
+    </release>
+  </releases>
+</component>

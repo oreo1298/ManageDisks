@@ -1,0 +1,52 @@
+# Maintainer: ManageDisks contributors
+#
+# Build and install from this directory:
+#   makepkg -si
+# Upgrade: run "makepkg -si" again (it fetches the latest commit).
+# Remove:  sudo pacman -Rns managedisks-git
+
+pkgname=managedisks-git
+_pkgname=managedisks
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="Modern disk and partition manager (GUI + diskpart-style CLI) that follows the system theme"
+arch=('any')
+url="https://github.com/oreo1298/managedisks"
+license=('MIT')
+depends=('python' 'pyside6' 'qt6-svg' 'util-linux' 'e2fsprogs' 'polkit')
+optdepends=(
+  'dosfstools: FAT16/FAT32 support'
+  'exfatprogs: exFAT support'
+  'ntfs-3g: NTFS support'
+  'btrfs-progs: Btrfs support'
+  'xfsprogs: XFS support'
+  'f2fs-tools: F2FS support'
+  'cryptsetup: LUKS encryption'
+  'smartmontools: drive health (S.M.A.R.T.)'
+  'udisks2: mount like the file manager does'
+)
+makedepends=('git' 'make')
+checkdepends=('python-pytest')
+provides=("$_pkgname")
+conflicts=("$_pkgname")
+source=("$_pkgname::git+https://github.com/oreo1298/managedisks.git")
+sha256sums=('SKIP')
+
+pkgver() {
+  cd "$_pkgname"
+  local base
+  base=$(sed -n 's/^__version__ = "\(.*\)"/\1/p' managedisks/__init__.py)
+  printf "%s.r%s.%s" "$base" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+check() {
+  cd "$_pkgname"
+  python -m pytest -q tests -k "not integration"
+}
+
+package() {
+  cd "$_pkgname"
+  make install DESTDIR="$pkgdir" PREFIX=/usr PYTHON=/usr/bin/python
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  python -m compileall -q -d /usr/share/managedisks "$pkgdir/usr/share/managedisks"
+}

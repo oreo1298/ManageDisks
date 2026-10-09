@@ -1,0 +1,100 @@
+.TH MANAGEDISKS-CLI 1 "2026-10-09" "ManageDisks 1.0.0" "User Commands"
+.SH NAME
+managedisks-cli \- command line disk and partition manager
+.SH SYNOPSIS
+.B managedisks-cli
+.I command
+[\fIoptions\fR]
+.br
+.B managedisks-cli shell
+.SH DESCRIPTION
+Scriptable access to everything the ManageDisks window can do. Commands that
+change disks must run as root and ask for confirmation unless \fB\-\-yes\fR
+is given. \fB\-\-dry\-run\fR prints the exact commands without running them.
+.PP
+Sizes accept K, M, G, T (binary, e.g. 20G), KB, MB, GB, TB (decimal), sectors
+(2048s) and percentages (50%). A bare number means MiB.
+.SH COMMANDS
+.TP
+.B list
+Disks, partitions and unallocated space.
+.TP
+.BI info " device"
+Details of a disk or partition.
+.TP
+.B support
+Which filesystems can be created, resized, checked... and which packages
+are missing.
+.TP
+.BI table " disk gpt|mbr"
+Create a new, empty partition table (erases the disk).
+.TP
+.BI create " disk"
+Create a partition: \fB\-s\fR size, \fB\-\-start\fR position, \fB\-f\fR
+filesystem, \fB\-L\fR label, \fB\-\-name\fR, \fB\-t\fR type,
+\fB\-\-encrypt\fR, \fB\-\-logical\fR, \fB\-\-extended\fR.
+.TP
+.BI delete " partition"
+Delete a partition.
+.TP
+.BI format " partition " \-f " fs"
+Format a partition (\fB\-L\fR label, \fB\-\-encrypt\fR).
+.TP
+.BI resize " partition"
+Grow, shrink and/or move: \fB\-\-size\fR 30G, +5G, max or
+\fB\-\-size=\-5G\fR; \fB\-\-start\fR or \fB\-\-move\-by=\fR+1G.
+.TP
+.BI label " partition label"
+Set the filesystem label.
+.TP
+.BI set " partition"
+Partition type (\fB\-t\fR), GPT name (\fB\-\-name\fR), GPT attributes
+(\fB\-\-attr\fR NAME=on|off) or the MBR boot flag (\fB\-\-boot\fR on|off).
+.TP
+.BI uuid " partition"
+Give the filesystem a new random UUID.
+.TP
+.BI check " partition"
+Check and repair a filesystem (\fB\-\-no\-repair\fR to only report).
+.TP
+.BI copy " partition disk"
+Copy a partition into unallocated space.
+.TP
+.BI wipe " device"
+Erase (\fB\-m\fR quick|zero|random|discard).
+.TP
+.BI convert " disk gpt|mbr"
+Convert the partition table keeping all data.
+.TP
+.BR mount ", " unmount ", " open ", " close
+Mount/unmount filesystems; unlock/lock LUKS volumes.
+.TP
+.BI smart " disk"
+Drive health; \fB\-\-test\fR short|long starts a self-test.
+.TP
+.BI surface " device"
+Read-only scan for unreadable sectors.
+.TP
+.BR "image create" " device file, " "image restore" " file device"
+Save a disk/partition to an image, or write an ISO/IMG (also .xz, .gz,
+\&.bz2) to a device.
+.TP
+.BI clone " source target"
+Clone a whole disk.
+.TP
+.B shell
+Interactive console with diskpart-style commands (LIST DISK, SELECT DISK n,
+CREATE PARTITION PRIMARY SIZE=n, FORMAT FS=ext4 QUICK, EXTEND, SHRINK,
+CLEAN, CONVERT GPT, ASSIGN, ...). Type HELP inside the shell.
+.SH EXAMPLES
+.nf
+sudo managedisks-cli table /dev/sdb gpt
+sudo managedisks-cli create /dev/sdb -s 512M -f fat32 -t esp -L EFI
+sudo managedisks-cli create /dev/sdb -f ext4 -L data
+sudo managedisks-cli resize /dev/sdb2 --size=-10G
+sudo managedisks-cli image restore archlinux.iso /dev/sdc
+.fi
+.SH EXIT STATUS
+0 on success, 1 on errors, 2 when a surface test found bad sectors.
+.SH SEE ALSO
+.BR managedisks (1)
