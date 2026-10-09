@@ -4,6 +4,7 @@ surface tests. All functions here expect to run as root."""
 from __future__ import annotations
 
 import bz2
+import contextlib
 import gzip
 import lzma
 import mmap
@@ -15,7 +16,7 @@ import uuid as uuidlib
 
 from . import scanner
 from .executor import CHUNK, ExecContext
-from .filesystems import BY_ID, lookup
+from .filesystems import BY_ID, lookup, probe
 from .operations import OpError
 from .runner import CommandError, have, output, run_simple
 from .units import format_size
@@ -75,14 +76,46 @@ def default_mountpoint(dev: str, label: str = "") -> str:
     return path
 
 
+MOUNT_HINTS = {
+    "apfs": "Linux has no built-in APFS driver. To read this volume install the linux-apfs-rw kernel "
+            "module (read-only by default) or apfs-fuse.",
+    "hfsplus": "Make sure the hfsplus kernel module is available (modprobe hfsplus).",
+}
+
+
+def _mount_options(mnt: str) -> list[str]:
+    try:
+        with open("/proc/self/mountinfo", encoding="utf-8") as f:
+            for line in f:
+                fields = line.split()
+                if len(fields) > 5 and fields[4].encode().decode("unicode_escape") == mnt:
+                    return fields[5].split(",")
+    except OSError:
+        pass
+    return []
+
+
 def mount(dev: str, mountpoint: str | None = None, options: str | None = None, label: str = "") -> str:
+    """Mount ``dev`` and return the mount point (plus a note if it ended up read-only)."""
     require_block_device(dev)
     mnt = mountpoint or default_mountpoint(dev, label)
+    created = not os.path.exists(mnt)
     os.makedirs(mnt, exist_ok=True)
     argv = ["mount"]
     if options:
         argv += ["-o", options]
-    run_simple(argv + [dev, mnt])
+    fstype = probe(dev).get("TYPE", "")
+    try:
+        run_simple(argv + [dev, mnt])
+    except CommandError as e:
+        if created:
+            with contextlib.suppress(OSError):
+                os.rmdir(mnt)
+        hint = MOUNT_HINTS.get(fstype)
+        raise OpError(f"{e}\n\n{hint}" if hint else str(e)) from None
+    if fstype == "hfsplus" and "ro" in _mount_options(mnt) and "ro" not in (options or "").split(","):
+        return (f"{mnt} (read-only: Linux cannot write to journaled HFS+ volumes; turn journaling off "
+                "on a Mac to write from Linux)")
     return mnt
 
 

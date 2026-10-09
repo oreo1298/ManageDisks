@@ -68,7 +68,7 @@ class SupportDialog(Dialog):
             self.body.addLayout(line)
         else:
             self.body.addWidget(QtWidgets.QLabel("All tools are installed."))
-        self.resize(880, 520)
+        self.resize(880, 680)
 
 
 class ApplyConfirmDialog(Dialog):

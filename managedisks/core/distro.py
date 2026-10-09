@@ -90,9 +90,15 @@ def pretty_name() -> str:
 
 
 def install_command(packages: list[str], fam: str | None = None) -> str:
+    from .filesystems import UNOFFICIAL
     fam = fam or family()
-    pkgs = " ".join(sorted(set(p for p in packages if p)))
-    if not pkgs:
-        return ""
-    template = INSTALL_CMD.get(fam or "", "Install with your package manager: {pkgs}")
-    return template.format(pkgs=pkgs)
+    wanted = sorted(set(p for p in packages if p))
+    unofficial = [p for p in wanted if p in UNOFFICIAL.get(fam or "", set())]
+    official = [p for p in wanted if p not in unofficial]
+    parts = []
+    if official:
+        template = INSTALL_CMD.get(fam or "", "Install with your package manager: {pkgs}")
+        parts.append(template.format(pkgs=" ".join(official)))
+    if unofficial:
+        parts.append("not in the official repositories (look in the AUR): " + " ".join(unofficial))
+    return "; ".join(parts)

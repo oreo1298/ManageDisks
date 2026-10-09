@@ -445,7 +445,7 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("-s", "--size", help="size (e.g. 20G, 50%%, max; default: the whole free region)")
     sp.add_argument("--start", help="position from the start of the disk (default: largest free region)")
     sp.add_argument("-f", "--fs", default="ext4", help="filesystem (ext4, btrfs, xfs, f2fs, fat32, exfat, "
-                                                        "ntfs, linux-swap, none, ...)")
+                                                        "ntfs, hfsplus, apfs, linux-swap, none, ...)")
     sp.add_argument("-L", "--label", help="filesystem label")
     sp.add_argument("--name", help="GPT partition name")
     sp.add_argument("-t", "--type", help="partition type (linux, esp, swap, msdata, bios_grub, lvm, raid, "

@@ -42,7 +42,12 @@ _PKG = {
     "cryptsetup": {"default": "cryptsetup", "gentoo": "sys-fs/cryptsetup"},
     "smartmontools": {"default": "smartmontools", "gentoo": "sys-apps/smartmontools"},
     "udisks": {"default": "udisks2", "gentoo": "sys-fs/udisks"},
+    "hfs": {"default": "hfsprogs", "fedora": "hfsplus-tools", "gentoo": "sys-fs/diskdev_cmds"},
+    "apfs": {"default": "apfsprogs"},
 }
+
+# Packages that are not in the official repositories of a distribution family.
+UNOFFICIAL = {"arch": {"hfsprogs", "apfsprogs"}}
 
 TOOL_PACKAGE = {
     **{t: "e2fsprogs" for t in ("mkfs.ext2", "mkfs.ext3", "mkfs.ext4", "e2fsck", "resize2fs",
@@ -59,6 +64,8 @@ TOOL_PACKAGE = {
     "cryptsetup": "cryptsetup",
     "smartctl": "smartmontools",
     "udisksctl": "udisks",
+    **{t: "hfs" for t in ("mkfs.hfsplus", "fsck.hfsplus", "fsck.hfs")},
+    **{t: "apfs" for t in ("mkapfs", "apfsck")},
 }
 
 
@@ -117,6 +124,8 @@ class Filesystem:
     label_upper = False
     movable = True
     color = "#888888"
+    gpt_only = False          # needs a GPT partition table
+    warning = ""              # shown whenever the user creates this filesystem
 
     # -- capabilities -----------------------------------------------------
     def supports(self, cap: str) -> bool:
@@ -676,6 +685,85 @@ class Luks(Filesystem):
         run.run(["cryptsetup", "-q", "luksUUID", "--uuid", str(uuidlib.uuid4()), dev])
 
 
+class HfsPlus(Filesystem):
+    id = "hfsplus"
+    name = "HFS+"
+    description = "Mac OS Extended: read and write on Macs, also on old macOS versions"
+    lsblk_types = ("hfsplus",)
+    tools = {
+        "create": ("mkfs.hfsplus",),
+        "check": ("fsck.hfsplus",),
+    }
+    min_size = MiB
+    max_label = 255
+    color = "#8e8e93"
+
+    def validate_label(self, label):
+        if ":" in label:
+            return "Mac volume names cannot contain “:”"
+        return super().validate_label(label)
+
+    def mkfs(self, run, dev, label=""):
+        # No journal: Linux can only write to non-journaled HFS+ volumes.
+        # (Journaling can be switched on later in macOS Disk Utility.)
+        run.run(["mkfs.hfsplus", "-v", label or "Untitled", dev])
+
+    def check(self, run, dev, repair=True, mountpoint=None):
+        if mountpoint:
+            raise Unsupported("Unmount the filesystem before checking it")
+        run.run(["fsck.hfsplus", "-f", "-y" if repair else "-n", dev])
+
+
+class Hfs(Filesystem):
+    """Classic HFS (Mac OS 9 and older): recognised and checked, not created."""
+    id = "hfs"
+    name = "HFS"
+    description = "Mac OS Standard (classic Mac OS)"
+    lsblk_types = ("hfs",)
+    tools = {"check": ("fsck.hfs",)}
+    color = "#a2845e"
+
+    def check(self, run, dev, repair=True, mountpoint=None):
+        if mountpoint:
+            raise Unsupported("Unmount the filesystem before checking it")
+        run.run(["fsck.hfs", "-f", "-y" if repair else "-n", dev])
+
+
+class Apfs(Filesystem):
+    id = "apfs"
+    name = "APFS"
+    description = "Apple File System, used by macOS 10.13 and newer"
+    lsblk_types = ("apfs",)
+    tools = {
+        "create": ("mkapfs",),
+        "check": ("apfsck",),
+    }
+    min_size = 128 * MiB
+    max_label = 255
+    gpt_only = True
+    color = "#5e5ce6"
+    warning = ("APFS support on Linux is experimental: the volume is created by apfsprogs, which its "
+               "authors describe as experimental, and Linux has no built-in APFS driver to mount it. "
+               "For a drive shared with a Mac, exFAT is the safer choice.")
+
+    def validate_label(self, label):
+        if ":" in label:
+            return "Mac volume names cannot contain “:”"
+        return super().validate_label(label)
+
+    def mkfs(self, run, dev, label=""):
+        argv = ["mkapfs"]
+        if label:
+            argv += ["-L", label]
+        run.run(argv + [dev])
+
+    def check(self, run, dev, repair=True, mountpoint=None):
+        if mountpoint:
+            raise Unsupported("Unmount the filesystem before checking it")
+        # apfsck only reports problems; it never modifies the volume.
+        run.run(["apfsck", dev])
+
+
 class Cleared(Filesystem):
     """Pseudo filesystem: wipe signatures and leave the partition empty."""
     id = "cleared"
@@ -691,7 +779,7 @@ class Cleared(Filesystem):
 
 FILESYSTEMS: list[Filesystem] = [
     Ext(4), Btrfs(), Xfs(), F2fs(), Ext(3), Ext(2), Fat(32), Fat(16), Exfat(), Ntfs(),
-    Swap(), Luks(), Cleared(),
+    HfsPlus(), Apfs(), Hfs(), Swap(), Luks(), Cleared(),
 ]
 
 BY_ID = {fs.id: fs for fs in FILESYSTEMS}
@@ -702,9 +790,6 @@ FOREIGN_NAMES = {
     "linux_raid_member": "Linux RAID member",
     "zfs_member": "ZFS member",
     "bcachefs": "bcachefs",
-    "hfsplus": "HFS+",
-    "hfs": "HFS",
-    "apfs": "APFS",
     "udf": "UDF",
     "iso9660": "ISO 9660",
     "squashfs": "SquashFS",

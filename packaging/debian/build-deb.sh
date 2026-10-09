@@ -28,7 +28,7 @@ Architecture: all
 Installed-Size: $SIZE
 Depends: python3 (>= 3.9), python3-pyqt6 | python3-pyside6.qtwidgets, fdisk | util-linux (<< 2.29.2-3~), util-linux, e2fsprogs, pkexec | policykit-1
 Recommends: qt6-svg-plugins, dosfstools, exfatprogs, ntfs-3g, btrfs-progs, xfsprogs, cryptsetup-bin, smartmontools, udisks2
-Suggests: f2fs-tools
+Suggests: f2fs-tools, hfsprogs, apfsprogs
 Maintainer: ManageDisks contributors <noreply@github.com>
 Homepage: https://github.com/oreo1298/ManageDisks
 Description: modern disk and partition manager

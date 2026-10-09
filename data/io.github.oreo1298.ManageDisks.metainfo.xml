@@ -14,7 +14,7 @@
     <ul>
       <li>Create, delete, format, resize and move partitions with a live preview</li>
       <li>Queue operations, undo them and apply everything at once</li>
-      <li>ext4, Btrfs, XFS, F2FS, FAT, exFAT, NTFS, swap and LUKS encryption</li>
+      <li>ext4, Btrfs, XFS, F2FS, FAT, exFAT, NTFS, HFS+, APFS, swap and LUKS encryption</li>
       <li>Convert between MBR and GPT without losing data</li>
       <li>Copy partitions, clone disks, write and create disk images</li>
       <li>Drive health (S.M.A.R.T.) and surface tests</li>

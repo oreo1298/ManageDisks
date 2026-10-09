@@ -65,7 +65,8 @@ EXTENDED_MBR_CODES = {"05", "0f", "85"}
 GENERIC_TYPES = {
     "0FC63DAF-8483-4772-8E79-3D69D8477DE4", "EBD0A0A2-B9E5-4433-87C0-68B6B72699C7",
     "0657FD6D-A4AB-43C4-84E5-0933C84B4F4F", "CA7D7CCB-63ED-4C53-861C-1742536059CC",
-    "83", "07", "0b", "0c", "0e", "06", "82",
+    "48465300-0000-11AA-AA11-00306543ECAC", "7C3457EF-0000-11AA-AA11-00306543ECAC",
+    "83", "07", "0b", "0c", "0e", "06", "82", "af",
 }
 
 
@@ -157,5 +158,7 @@ def default_type_for_fs(fstype: str, table: str) -> str:
         "fat16": "msdata" if table == "gpt" else "fat16",
         "vfat": "msdata" if table == "gpt" else "fat32",
         "luks": "linux",
+        "hfsplus": "apple-hfs", "hfs": "apple-hfs",
+        "apfs": "apple-apfs",
     }.get(fstype, "linux")
     return resolve(key, table)

@@ -31,7 +31,8 @@ Create a new, empty partition table (erases the disk).
 .TP
 .BI create " disk"
 Create a partition: \fB\-s\fR size, \fB\-\-start\fR position, \fB\-f\fR
-filesystem, \fB\-L\fR label, \fB\-\-name\fR, \fB\-t\fR type,
+filesystem (ext4, btrfs, xfs, f2fs, fat32, exfat, ntfs, hfsplus, apfs, linux-swap, none),
+\fB\-L\fR label, \fB\-\-name\fR, \fB\-t\fR type,
 \fB\-\-encrypt\fR, \fB\-\-logical\fR, \fB\-\-extended\fR.
 .TP
 .BI delete " partition"

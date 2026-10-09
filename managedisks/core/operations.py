@@ -90,6 +90,17 @@ def _check_fs_size(fs: Filesystem | None, size_bytes: int) -> None:
         raise OpError(f"{fs.name} can be at most {format_size(fs.max_size)}")
 
 
+def _check_table(fs: Filesystem | None, disk: Disk) -> None:
+    if fs is not None and fs.gpt_only and disk.table != "gpt":
+        raise OpError(f"{fs.name} needs a GPT partition table (as used by Macs); this disk uses "
+                      f"{parttypes.table_label(disk.table)}")
+
+
+def _fs_warnings(fstype: str) -> list[str]:
+    fs = BY_ID.get(fstype)
+    return [fs.warning] if fs is not None and fs.warning else []
+
+
 def _check_label(fs: Filesystem | None, label: str) -> str:
     if not label:
         return ""
@@ -233,6 +244,9 @@ class CreatePartition(Operation):
     op: ClassVar[str] = "create_partition"
     secret_fields: ClassVar[tuple[str, ...]] = ("passphrase",)
 
+    def warnings(self, disks):
+        return [] if self.kind == "extended" else _fs_warnings(self.fstype)
+
     def describe(self):
         what = "extended partition" if self.kind == "extended" else (
             f"{BY_ID[self.fstype].name if self.fstype in BY_ID else 'unformatted'}"
@@ -275,6 +289,7 @@ class CreatePartition(Operation):
             if fs is None or not fs.implemented("create") or fs.id == "luks":
                 raise OpError(f"Cannot create a {self.fstype} filesystem")
             _check_fs_size(fs, self.size * disk.sector_size)
+            _check_table(fs, disk)
         if self.encrypt:
             if fs is None:
                 raise OpError("Choose a filesystem to put inside the encrypted volume")
@@ -387,6 +402,9 @@ class FormatPartition(Operation):
     destructive: ClassVar[bool] = True
     secret_fields: ClassVar[tuple[str, ...]] = ("passphrase",)
 
+    def warnings(self, disks):
+        return _fs_warnings(self.fstype)
+
     def describe(self):
         name = BY_ID[self.fstype].name if self.fstype in BY_ID else self.fstype
         enc = " (encrypted)" if self.encrypt else ""
@@ -405,6 +423,7 @@ class FormatPartition(Operation):
         if fs is None or fs.id == "luks":
             raise OpError(f"Unknown filesystem {self.fstype}")
         _check_fs_size(fs, p.size * disk.sector_size)
+        _check_table(fs, disk)
         if self.encrypt:
             if fs.id == "cleared":
                 raise OpError("Choose a filesystem to put inside the encrypted volume")
@@ -856,7 +875,8 @@ class CopyPartition(Operation):
         p = Partition(number=dst.next_number(kind), start=self.dest_start, size=self.dest_size, kind=kind,
                       type_id=type_id, name=src.name if dst.table == "gpt" else "", fstype=src.fstype,
                       fsversion=src.fsversion, label=src.label,
-                      fsuuid="(new)" if self.new_uuid else src.fsuuid,
+                      fsuuid="(new)" if self.new_uuid and fs is not None and fs.implemented("uuid")
+                      else src.fsuuid,
                       fs_size=self.dest_size * dst.sector_size if src.fs_size else None,
                       fs_used=src.fs_used, pending=["new", "copy"])
         dst.partitions.append(p)

@@ -24,6 +24,7 @@ interface that follows your desktop's theme.
 | **Safe, queued changes** | Operations are *pending* until you press **Apply**. The map previews the result; undo any step. Everything is re-validated before it runs. |
 | **Partitions** | Create, delete, format, **resize, move** (data is moved safely by `sfdisk --move-data`), copy/paste, wipe. Primary/extended/logical on MBR. |
 | **Filesystems** | ext2/3/4, Btrfs, XFS, F2FS, FAT16/32, exFAT, NTFS, Linux swap. Grow/shrink where the filesystem allows it, check & repair, labels, new UUIDs. |
+| **Mac filesystems** | HFS+ (Mac OS Extended): create, check & repair, move, copy. APFS: create and check (experimental, see below). Classic HFS: check, move, copy. Apple partition types are set automatically. |
 | **Encryption** | Create LUKS2 encrypted partitions, unlock/lock them. |
 | **Partition tables** | New GPT/MBR table, **convert MBR ⇄ GPT without data loss**, partition type, GPT name and attributes, MBR boot flag. |
 | **Disk tools** | S.M.A.R.T. health & self-tests, surface test (bad sectors), **clone disk**, **create/restore images** (write an ISO or `.img.xz` to a USB stick), safely remove. |
@@ -157,8 +158,15 @@ Sizes accept `20G`/`20GiB` (binary), `20GB` (decimal), `2048s` (sectors) and
 * Partitions that are mounted can only be grown (ext4, Btrfs, XFS) or shrunk
   (Btrfs) online. Moving needs the partition unmounted. To modify your running
   system partition, boot a live USB.
-* Not yet supported: resizing FAT and LUKS volumes, and managing LVM/RAID/ZFS
-  (they are shown, but left alone).
+* Not yet supported: resizing FAT, LUKS, HFS+ and APFS volumes (no Linux tool can
+  do it safely), and managing LVM/RAID/ZFS (they are shown, but left alone).
+* **Mac filesystems.** HFS+ volumes are created without a journal, because Linux can
+  only write to non-journaled HFS+; macOS reads and writes them normally (you can
+  turn journaling on in Disk Utility, after which Linux mounts them read-only).
+  APFS volumes are created with `mkapfs` from apfsprogs, which its authors call
+  experimental, and mounting APFS on Linux needs the out-of-tree
+  [linux-apfs-rw](https://github.com/linux-apfs/linux-apfs-rw) module or apfs-fuse.
+  For a drive shared between Linux, macOS and Windows, exFAT is the safest choice.
 
 ## Development
 

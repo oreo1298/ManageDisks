@@ -79,6 +79,19 @@ class Dialog(QtWidgets.QDialog):
         self.buttons.rejected.connect(self.reject)
         self.outer.addWidget(self.buttons)
 
+    def fit_height(self):
+        """Grow to fit the content at the current width (word-wrapped labels
+        need more height than QLayout's plain size hint reports)."""
+        lay = self.layout()
+        need = lay.totalHeightForWidth(self.width()) if lay.hasHeightForWidth() else -1
+        need = max(need, self.sizeHint().height())
+        if self.height() < need:
+            self.resize(self.width(), need)
+
+    def showEvent(self, e):
+        super().showEvent(e)
+        QtCore.QTimer.singleShot(0, self.fit_height)
+
     def form(self) -> QtWidgets.QFormLayout:
         f = QtWidgets.QFormLayout()
         f.setFieldGrowthPolicy(QtWidgets.QFormLayout.FieldGrowthPolicy.ExpandingFieldsGrow)
@@ -122,7 +135,8 @@ class FsCombo(QtWidgets.QComboBox):
     """Filesystem picker: unavailable filesystems are disabled with a hint
     telling the user which package to install."""
 
-    def __init__(self, allow_none: bool = True, size_bytes: int | None = None, parent=None):
+    def __init__(self, allow_none: bool = True, size_bytes: int | None = None, table: str | None = None,
+                 parent=None):
         super().__init__(parent)
         model = QtGui.QStandardItemModel(self)
         self.setModel(model)
@@ -139,6 +153,11 @@ class FsCombo(QtWidgets.QComboBox):
                 pkgs = sorted({filesystems.package_for(t) for t in fs.missing_tools("create")})
                 tip += f"\nNot available: install {', '.join(pkgs)}\n{distro.install_command(pkgs)}"
                 item.setText(f"{fs.name} (not installed)")
+            if fs.warning and enabled:
+                item.setText(f"{fs.name} (experimental)")
+            if fs.gpt_only and table not in (None, "gpt") and enabled:
+                enabled = False
+                tip += "\nNeeds a GPT partition table"
             if size_bytes is not None and enabled:
                 if size_bytes < fs.min_size:
                     enabled = False

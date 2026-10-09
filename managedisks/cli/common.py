@@ -260,7 +260,8 @@ def plan_one(disks: list[Disk], op: Operation) -> list[Operation]:
 def fs_choice(name: str) -> str:
     key = name.lower()
     aliases = {"vfat": "fat32", "fat": "fat32", "swap": "linux-swap", "none": "cleared",
-               "raw": "cleared", "ext": "ext4", "msdos": "fat16"}
+               "raw": "cleared", "ext": "ext4", "msdos": "fat16", "hfs+": "hfsplus", "hfsx": "hfsplus",
+               "macos": "hfsplus"}
     key = aliases.get(key, key)
     if key not in filesystems.BY_ID or key == "luks":
         raise CliError(f"Unknown filesystem {name!r}. Choose from: "

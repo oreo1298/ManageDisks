@@ -131,6 +131,20 @@ class _Geometry(QtWidgets.QWidget):
         self.resizer.update()
 
 
+def _can_encrypt(fs) -> bool:
+    # Macs cannot open LUKS volumes, so encrypting Mac filesystems is pointless.
+    return bool(fs) and fs.id not in ("cleared", "linux-swap", "hfsplus", "apfs")
+
+
+def _show_fs_warning(widget: QtWidgets.QWidget, fs) -> None:
+    text = fs.warning if fs is not None else ""
+    widget.findChildren(QtWidgets.QLabel)[-1].setText(text)
+    widget.setVisible(bool(text))
+    dlg = widget.window()
+    if hasattr(dlg, "fit_height") and dlg.isVisible():  # grow instead of squeezing the fields
+        QtCore.QTimer.singleShot(0, dlg.fit_height)
+
+
 class CreatePartitionDialog(Dialog):
     def __init__(self, parent, disk: Disk, free: FreeSpace):
         super().__init__(parent, "New Partition", "Create a new partition", ok_text="Add",
@@ -156,7 +170,7 @@ class CreatePartitionDialog(Dialog):
                                               "extended")
             form.addRow("Create as:", self.kind_box)
             self.kind_box.currentIndexChanged.connect(self._kind_changed)
-        self.fs = FsCombo(allow_none=True)
+        self.fs = FsCombo(allow_none=True, table=disk.table)
         self.fs_desc = QtWidgets.QLabel()
         self.fs_desc.setWordWrap(True)
         self.fs_desc.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Preferred)
@@ -181,6 +195,8 @@ class CreatePartitionDialog(Dialog):
         form.addRow("Partition type:", self.type)
         self.crypt = PassphraseFields()
         self.body.addWidget(self.crypt)
+        self.fs_warning = warning_label("")
+        self.body.addWidget(self.fs_warning)
         self.fs.currentIndexChanged.connect(self._fs_changed)
         self._fs_changed()
         self._kind_changed()
@@ -198,7 +214,8 @@ class CreatePartitionDialog(Dialog):
             self.label.setMaxLength(fs.max_label if fs.id != "cleared" else 0)
             self.label.setEnabled(fs.id != "cleared")
             self.geo.set_color(fs.color)
-        self.crypt.setEnabled(bool(fs) and fs.id not in ("cleared", "linux-swap"))
+        _show_fs_warning(self.fs_warning, fs)
+        self.crypt.setEnabled(_can_encrypt(fs))
         if not self.crypt.isEnabled():
             self.crypt.encrypt.setChecked(False)
 
@@ -339,7 +356,7 @@ class FormatDialog(Dialog):
         self.part = part
         size = part.size * disk.sector_size
         form = self.form()
-        self.fs = FsCombo(allow_none=True, size_bytes=size)
+        self.fs = FsCombo(allow_none=True, size_bytes=size, table=disk.table)
         cur = filesystems.lookup(part.fstype, part.fsversion)
         if cur:
             self.fs.set_fs(cur.id)
@@ -348,6 +365,8 @@ class FormatDialog(Dialog):
         form.addRow("Label:", self.label)
         self.crypt = PassphraseFields()
         self.body.addWidget(self.crypt)
+        self.fs_warning = warning_label("")
+        self.body.addWidget(self.fs_warning)
         self.body.addWidget(warning_label(
             f"<b>All data on {part.display_name()} ({format_size(size)}) will be erased.</b>"))
         self.fs.currentIndexChanged.connect(self._fs_changed)
@@ -359,7 +378,8 @@ class FormatDialog(Dialog):
         self.label.setEnabled(bool(fs) and fs.id != "cleared")
         if fs:
             self.label.setMaxLength(max(1, fs.max_label))
-        self.crypt.setEnabled(bool(fs) and fs.id not in ("cleared", "linux-swap"))
+        _show_fs_warning(self.fs_warning, fs)
+        self.crypt.setEnabled(_can_encrypt(fs))
         if not self.crypt.isEnabled():
             self.crypt.encrypt.setChecked(False)
 

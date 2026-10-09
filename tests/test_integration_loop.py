@@ -248,3 +248,38 @@ def test_dry_run_runs_nothing(loopdisk):
     cmds = [e["line"] for e in events if e["type"] == "log" and e["line"].startswith("$ ")]
     assert any("mkfs.ext4" in c for c in cmds)
     assert _disk(loopdisk).table is None
+
+
+def _blkid(path, tag):
+    return subprocess.run(["blkid", "-p", "-o", "value", "-s", tag, path], capture_output=True,
+                          text=True).stdout.strip()
+
+
+def test_mac_filesystems(loopdisk):
+    if not shutil.which("mkfs.hfsplus"):
+        pytest.skip("hfsprogs missing")
+    d = _disk(loopdisk)
+    a = d.alignment
+    mb = MiB // 512
+    ops = [CreateTable(loopdisk, "gpt"),
+           CreatePartition(loopdisk, start=a, size=200 * mb, fstype="hfsplus", label="Mac Data")]
+    if shutil.which("mkapfs"):
+        ops.append(CreatePartition(loopdisk, start=a + 600 * mb, size=200 * mb, fstype="apfs", label="MacAPFS"))
+    _run(_plan(loopdisk, *ops), loopdisk)
+    d = _disk(loopdisk)
+    hfs = d.by_number(1)
+    assert (hfs.fstype, hfs.label, hfs.type_id) == ("hfsplus", "Mac Data", "48465300-0000-11AA-AA11-00306543ECAC")
+    if shutil.which("mkapfs"):
+        apfs = d.by_number(2)
+        assert (apfs.fstype, apfs.type_id) == ("apfs", "7C3457EF-0000-11AA-AA11-00306543ECAC")
+        _run(_plan(loopdisk, CheckFilesystem(loopdisk, start=apfs.start)), loopdisk)
+    # Move the HFS+ volume right, into the free space; it must stay intact.
+    new_start = a + 300 * mb
+    _run(_plan(loopdisk, CheckFilesystem(loopdisk, start=a),
+               ResizeMovePartition(loopdisk, start=a, new_start=new_start, new_size=hfs.size)), loopdisk)
+    moved = _disk(loopdisk).find(new_start)
+    assert moved is not None and _blkid(moved.path, "LABEL") == "Mac Data"
+    subprocess.run(["fsck.hfsplus", "-f", "-n", moved.path], check=True, capture_output=True)
+    # Reformat it for Linux: the partition type follows the filesystem.
+    _run(_plan(loopdisk, FormatPartition(loopdisk, start=new_start, fstype="ext4")), loopdisk)
+    assert _disk(loopdisk).find(new_start).type_id == "0FC63DAF-8483-4772-8E79-3D69D8477DE4"

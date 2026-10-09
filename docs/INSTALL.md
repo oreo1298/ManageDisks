@@ -51,8 +51,17 @@ Optional (each enables more features; *Filesystem Support* in the app and
 | F2FS | f2fs-tools | f2fs-tools | f2fs-tools | f2fs-tools |
 | LUKS encryption | cryptsetup | cryptsetup-bin | cryptsetup | cryptsetup |
 | Drive health | smartmontools | smartmontools | smartmontools | smartmontools |
+| Mac HFS+ | hfsprogs (AUR) | hfsprogs | hfsplus-tools | not packaged¹ |
+| Mac APFS (experimental) | build from source² | apfsprogs | build from source² | apfsprogs |
 | Mount like the file manager | udisks2 | udisks2 | udisks2 | udisks2 |
 | SVG icon themes (Adwaita) | qt6-svg | qt6-svg-plugins | qt6-qtsvg | qt6-svg |
+
+¹ openSUSE has no HFS+ package in its main repositories as far as we know; check
+`zypper search hfsplus` or the Open Build Service. ² apfsprogs is not in the
+official Arch or Fedora repositories as far as we know: build it from
+[github.com/linux-apfs/apfsprogs](https://github.com/linux-apfs/apfsprogs) (see its README)
+or look for a community package. Mounting APFS additionally needs the
+[linux-apfs-rw](https://github.com/linux-apfs/linux-apfs-rw) kernel module or apfs-fuse.
 
 ## Option A: install.sh (all distributions)
 

@@ -133,7 +133,6 @@ def test_theme_palettes(qapp):
 
 def test_all_dialogs_construct(qapp):
     """Build every dialog once (catches binding-specific runtime errors)."""
-    from managedisks.core.model import FreeSpace
     from managedisks.gui.dialogs import disk as dd
     from managedisks.gui.dialogs import partition as pd
     from managedisks.gui.dialogs.misc import ApplyConfirmDialog, SupportDialog
@@ -201,3 +200,19 @@ def test_all_dialogs_construct(qapp):
         qapp.processEvents()
     assert events == ["started"] and pdlg.finished_ok is True
     pdlg.close()
+
+
+def test_fs_combo_respects_table(qapp):
+    from managedisks.gui.dialogs.common import FsCombo
+
+    def state(combo, fs_id):
+        for i in range(combo.count()):
+            if combo.itemData(i, qt.QtCore.Qt.ItemDataRole.UserRole) == fs_id:
+                item = combo.model().item(i)
+                return item.isEnabled(), item.text()
+    apfs_gpt = state(FsCombo(table="gpt", size_bytes=1024 * MiB), "apfs")
+    apfs_mbr = state(FsCombo(table="dos", size_bytes=1024 * MiB), "apfs")
+    if apfs_gpt[0]:                                     # mkapfs installed
+        assert "experimental" in apfs_gpt[1]
+    assert apfs_mbr[0] is False
+    assert state(FsCombo(table="dos"), "hfs") is None   # classic HFS cannot be created

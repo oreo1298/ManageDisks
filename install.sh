@@ -142,6 +142,7 @@ pm_install() {
 # want "description" candidate... -> appends the first available candidate to PKGS
 PKGS=""
 MISSING=""
+AUR_NOTE=""
 want() {
     desc=$1; shift
     if p=$(first_available "$@"); then
@@ -175,6 +176,7 @@ install_deps() {
                 want "FAT tools" dosfstools; want "exFAT tools" exfatprogs; want "NTFS tools" ntfs-3g
                 want "Btrfs tools" btrfs-progs; want "XFS tools" xfsprogs; want "F2FS tools" f2fs-tools
                 want "LUKS" cryptsetup; want "S.M.A.R.T." smartmontools; want "udisks" udisks2
+                AUR_NOTE="Mac filesystem tools are not in the official Arch repositories: hfsprogs (HFS+) is in the AUR; for APFS build apfsprogs from https://github.com/linux-apfs/apfsprogs."
             fi ;;
         debian)
             want "Python 3" python3
@@ -188,6 +190,7 @@ install_deps() {
                 want "FAT tools" dosfstools; want "exFAT tools" exfatprogs exfat-utils; want "NTFS tools" ntfs-3g
                 want "Btrfs tools" btrfs-progs; want "XFS tools" xfsprogs; want "F2FS tools" f2fs-tools
                 want "LUKS" cryptsetup-bin cryptsetup; want "S.M.A.R.T." smartmontools; want "udisks" udisks2
+                want "HFS+ tools (Mac)" hfsprogs; want "APFS tools (Mac)" apfsprogs
             fi ;;
         fedora|mageia)
             want "Python 3" python3
@@ -201,6 +204,7 @@ install_deps() {
                 want "FAT tools" dosfstools; want "exFAT tools" exfatprogs; want "NTFS tools" ntfsprogs ntfs-3g
                 want "Btrfs tools" btrfs-progs; want "XFS tools" xfsprogs; want "F2FS tools" f2fs-tools
                 want "LUKS" cryptsetup; want "S.M.A.R.T." smartmontools; want "udisks" udisks2
+                want "HFS+ tools (Mac)" hfsplus-tools hfsprogs; want "APFS tools (Mac)" apfsprogs
             fi ;;
         suse)
             want "Python 3" python3
@@ -214,6 +218,7 @@ install_deps() {
                 want "FAT tools" dosfstools; want "exFAT tools" exfatprogs; want "NTFS tools" ntfsprogs ntfs-3g
                 want "Btrfs tools" btrfsprogs; want "XFS tools" xfsprogs; want "F2FS tools" f2fs-tools
                 want "LUKS" cryptsetup; want "S.M.A.R.T." smartmontools; want "udisks" udisks2
+                want "HFS+ tools (Mac)" hfsplus-tools hfsprogs; want "APFS tools (Mac)" apfsprogs
             fi ;;
         void)
             want "Python 3" python3
@@ -227,6 +232,7 @@ install_deps() {
                 want "FAT tools" dosfstools; want "exFAT tools" exfatprogs; want "NTFS tools" ntfs-3g
                 want "Btrfs tools" btrfs-progs; want "XFS tools" xfsprogs; want "F2FS tools" f2fs-tools
                 want "LUKS" cryptsetup; want "S.M.A.R.T." smartmontools; want "udisks" udisks2
+                want "HFS+ tools (Mac)" hfsprogs; want "APFS tools (Mac)" apfsprogs
             fi ;;
         alpine)
             want "Python 3" python3
@@ -241,6 +247,7 @@ install_deps() {
                 want "FAT tools" dosfstools; want "exFAT tools" exfatprogs; want "NTFS tools" ntfs-3g-progs
                 want "Btrfs tools" btrfs-progs; want "XFS tools" xfsprogs; want "F2FS tools" f2fs-tools
                 want "LUKS" cryptsetup; want "S.M.A.R.T." smartmontools; want "udisks" udisks2
+                want "HFS+ tools (Mac)" hfsprogs; want "APFS tools (Mac)" apfsprogs
             fi ;;
         gentoo)
             want "Qt for Python" dev-python/pyside dev-python/PyQt6
@@ -252,6 +259,7 @@ install_deps() {
                 want "NTFS tools" sys-fs/ntfs3g; want "Btrfs tools" sys-fs/btrfs-progs
                 want "XFS tools" sys-fs/xfsprogs; want "F2FS tools" sys-fs/f2fs-tools
                 want "LUKS" sys-fs/cryptsetup; want "S.M.A.R.T." sys-apps/smartmontools
+                want "HFS+ tools (Mac)" sys-fs/diskdev_cmds
             fi ;;
         solus)
             want "Python 3" python3
@@ -277,6 +285,7 @@ install_deps() {
         warn "these could not be found in your repositories:"
         printf "%b\n" "$MISSING" >&2
     fi
+    if [ -n "$AUR_NOTE" ]; then warn "$AUR_NOTE"; fi
 }
 
 # ---------------------------------------------------------------- checks

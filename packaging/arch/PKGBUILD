@@ -24,6 +24,7 @@ optdepends=(
   'cryptsetup: LUKS encryption'
   'smartmontools: drive health (S.M.A.R.T.)'
   'udisks2: mount like the file manager does'
+  'hfsprogs: Mac HFS+ support (AUR)'
 )
 makedepends=('git' 'make')
 checkdepends=('python-pytest')

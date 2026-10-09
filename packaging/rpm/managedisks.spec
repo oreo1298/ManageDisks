@@ -29,6 +29,7 @@ Recommends:     cryptsetup
 Recommends:     smartmontools
 Recommends:     udisks2
 Suggests:       f2fs-tools
+Suggests:       hfsplus-tools
 
 %description
 ManageDisks creates, deletes, formats, resizes, moves and copies partitions,

@@ -320,3 +320,76 @@ def test_distro_family(text, family):
 def test_install_command():
     assert distro.install_command(["b", "a"], "arch") == "sudo pacman -S --needed a b"
     assert distro.install_command(["x"], "debian") == "sudo apt install x"
+
+
+# -- Mac filesystems -------------------------------------------------------------
+APPLE_HFS = "48465300-0000-11AA-AA11-00306543ECAC"
+APPLE_APFS = "7C3457EF-0000-11AA-AA11-00306543ECAC"
+
+
+def test_mac_filesystems_registry():
+    assert filesystems.lookup("hfsplus").name == "HFS+"
+    assert filesystems.lookup("apfs").name == "APFS"
+    assert filesystems.lookup("hfs").implemented("check")
+    assert not filesystems.lookup("hfs").implemented("create")       # classic HFS: check only
+    for fs_id in ("hfsplus", "apfs"):
+        fs = filesystems.BY_ID[fs_id]
+        assert not fs.implemented("grow") and not fs.implemented("shrink")
+        assert fs.implemented("move")
+    assert filesystems.BY_ID["apfs"].warning and not filesystems.BY_ID["hfsplus"].warning
+
+
+def test_mac_partition_types():
+    d = gpt_disk()
+    p = simulate([d], [CreatePartition(d.path, start=S, size=200 * S, fstype="hfsplus", label="Mac")])[0].partitions[0]
+    assert (p.fstype, p.type_id, p.label) == ("hfsplus", APPLE_HFS, "Mac")
+    p = simulate([d], [CreatePartition(d.path, start=S, size=200 * S, fstype="apfs")])[0].partitions[0]
+    assert p.type_id == APPLE_APFS
+    m = mbr_disk()
+    p = simulate([m], [CreatePartition(m.path, start=S, size=200 * S, fstype="hfsplus")])[0].partitions[0]
+    assert p.type_id == "af"
+
+
+def test_apfs_rules():
+    d, m = gpt_disk(), mbr_disk()
+    with pytest.raises(OpError, match="GPT"):
+        simulate([m], [CreatePartition(m.path, start=S, size=200 * S, fstype="apfs")])
+    with pytest.raises(OpError, match="128 MiB"):
+        simulate([d], [CreatePartition(d.path, start=S, size=100 * S, fstype="apfs")])
+    with pytest.raises(OpError, match=":"):
+        simulate([d], [CreatePartition(d.path, start=S, size=200 * S, fstype="hfsplus", label="a:b")])
+    op = FormatPartition(d.path, start=S, fstype="apfs")
+    assert op.warnings([]) and "experimental" in op.warnings([])[0]
+    assert CreatePartition(d.path, start=S, size=200 * S, fstype="hfsplus").warnings([]) == []
+
+
+def test_reformat_switches_between_linux_and_mac_types():
+    d = gpt_disk(parts=[(1, 1024, "ext4")])
+    p = simulate([d], [FormatPartition(d.path, start=S, fstype="hfsplus")])[0].by_number(1)
+    assert p.type_id == APPLE_HFS
+    d.partitions[0].type_id, d.partitions[0].fstype = APPLE_HFS, "hfsplus"
+    p = simulate([d], [FormatPartition(d.path, start=S, fstype="exfat")])[0].by_number(1)
+    assert p.type_id == parttypes.by_key("msdata").gpt
+
+
+def test_mac_filesystems_cannot_be_resized_but_can_move():
+    d = gpt_disk(parts=[(1, 1024, "hfsplus")])
+    with pytest.raises(OpError, match="grown"):
+        simulate([d], [ResizeMovePartition(d.path, start=S, new_start=S, new_size=2048 * S)])
+    p = simulate([d], [ResizeMovePartition(d.path, start=S, new_start=2048 * S, new_size=1024 * S)])[0]
+    assert p.find(2048 * S) is not None
+
+
+def test_copy_of_hfsplus_keeps_uuid_in_preview():
+    d = gpt_disk(parts=[(1, 1024, "hfsplus")])
+    d.partitions[0].fsuuid = "abc"
+    p = simulate([d], [CopyPartition(d.path, start=S, dest_disk=d.path, dest_start=2048 * S,
+                                     dest_size=1024 * S)])[0].by_number(2)
+    assert p.fsuuid == "abc"   # HFS+ UUIDs cannot be changed on Linux
+
+
+def test_install_command_marks_unofficial_packages():
+    cmd = distro.install_command(["hfsprogs", "dosfstools"], "arch")
+    assert cmd.startswith("sudo pacman -S --needed dosfstools") and "AUR" in cmd and "hfsprogs" in cmd
+    assert filesystems.package_for("mkfs.hfsplus", "fedora") == "hfsplus-tools"
+    assert filesystems.package_for("mkapfs", "debian") == "apfsprogs"
