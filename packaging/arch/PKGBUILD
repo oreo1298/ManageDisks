@@ -11,7 +11,7 @@ pkgver=1.0.0
 pkgrel=1
 pkgdesc="Modern disk and partition manager (GUI + diskpart-style CLI) that follows the system theme"
 arch=('any')
-url="https://github.com/oreo1298/managedisks"
+url="https://github.com/oreo1298/ManageDisks"
 license=('MIT')
 depends=('python' 'pyside6' 'qt6-svg' 'util-linux' 'e2fsprogs' 'polkit')
 optdepends=(
@@ -29,7 +29,7 @@ makedepends=('git' 'make')
 checkdepends=('python-pytest')
 provides=("$_pkgname")
 conflicts=("$_pkgname")
-source=("$_pkgname::git+https://github.com/oreo1298/managedisks.git")
+source=("$_pkgname::git+https://github.com/oreo1298/ManageDisks.git")
 sha256sums=('SKIP')
 
 pkgver() {

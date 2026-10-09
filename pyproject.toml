@@ -27,7 +27,7 @@ managedisks-cli = "managedisks.cli.main:main"
 managedisks = "managedisks.gui.app:main"
 
 [project.urls]
-Homepage = "https://github.com/oreo1298/managedisks"
+Homepage = "https://github.com/oreo1298/ManageDisks"
 
 [tool.setuptools.dynamic]
 version = { attr = "managedisks.__version__" }

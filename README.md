@@ -38,8 +38,8 @@ interface that follows your desktop's theme.
 The quickest way, on **any** supported distribution:
 
 ```sh
-git clone https://github.com/oreo1298/managedisks.git
-cd managedisks
+git clone https://github.com/oreo1298/ManageDisks.git
+cd ManageDisks
 ./install.sh            # asks for your password, installs dependencies + ManageDisks
 ```
 
@@ -65,7 +65,7 @@ running from source, and troubleshooting.
 ### Upgrade
 
 ```sh
-cd managedisks
+cd ManageDisks
 ./install.sh upgrade     # git pull + reinstall (keeps your install prefix)
 ```
 

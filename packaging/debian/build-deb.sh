@@ -30,7 +30,7 @@ Depends: python3 (>= 3.9), python3-pyqt6 | python3-pyside6.qtwidgets, fdisk | ut
 Recommends: qt6-svg-plugins, dosfstools, exfatprogs, ntfs-3g, btrfs-progs, xfsprogs, cryptsetup-bin, smartmontools, udisks2
 Suggests: f2fs-tools
 Maintainer: ManageDisks contributors <noreply@github.com>
-Homepage: https://github.com/oreo1298/managedisks
+Homepage: https://github.com/oreo1298/ManageDisks
 Description: modern disk and partition manager
  ManageDisks creates, deletes, formats, resizes, moves and copies
  partitions, converts between MBR and GPT, encrypts with LUKS, checks

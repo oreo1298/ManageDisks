@@ -4,7 +4,7 @@
  "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
 <policyconfig>
   <vendor>ManageDisks</vendor>
-  <vendor_url>https://github.com/oreo1298/managedisks</vendor_url>
+  <vendor_url>https://github.com/oreo1298/ManageDisks</vendor_url>
   <icon_name>io.github.oreo1298.ManageDisks</icon_name>
 
   <action id="io.github.oreo1298.ManageDisks.helper">

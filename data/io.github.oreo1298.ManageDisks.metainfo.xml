@@ -22,15 +22,15 @@
     </ul>
   </description>
   <launchable type="desktop-id">io.github.oreo1298.ManageDisks.desktop</launchable>
-  <url type="homepage">https://github.com/oreo1298/managedisks</url>
-  <url type="bugtracker">https://github.com/oreo1298/managedisks/issues</url>
+  <url type="homepage">https://github.com/oreo1298/ManageDisks</url>
+  <url type="bugtracker">https://github.com/oreo1298/ManageDisks/issues</url>
   <developer id="io.github.oreo1298">
     <name>ManageDisks contributors</name>
   </developer>
   <screenshots>
     <screenshot type="default">
       <caption>Disk overview</caption>
-      <image>https://raw.githubusercontent.com/oreo1298/managedisks/main/docs/screenshots/main-light.png</image>
+      <image>https://raw.githubusercontent.com/oreo1298/ManageDisks/HEAD/docs/screenshots/main-light.png</image>
     </screenshot>
   </screenshots>
   <content_rating type="oars-1.1"/>

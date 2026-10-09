@@ -57,8 +57,8 @@ Optional (each enables more features; *Filesystem Support* in the app and
 ## Option A: install.sh (all distributions)
 
 ```sh
-git clone https://github.com/oreo1298/managedisks.git
-cd managedisks
+git clone https://github.com/oreo1298/ManageDisks.git
+cd ManageDisks
 ./install.sh
 ```
 
@@ -79,7 +79,7 @@ packages.
 | `./install.sh upgrade` | `git pull` the checkout and reinstall into the same prefix |
 | `./install.sh uninstall` | remove ManageDisks (`--purge` also removes settings and logs) |
 
-**Upgrade:** `cd managedisks && ./install.sh upgrade`. If you downloaded a
+**Upgrade:** `cd ManageDisks && ./install.sh upgrade`. If you downloaded a
 tarball instead of cloning, extract the new version and run
 `./install.sh upgrade` from it.
 
@@ -94,8 +94,8 @@ package, the script tells you to remove it with your package manager instead.
 Manjaro, EndeavourOS, CachyOS, Garuda, Artix:
 
 ```sh
-git clone https://github.com/oreo1298/managedisks.git
-cd managedisks/packaging/arch
+git clone https://github.com/oreo1298/ManageDisks.git
+cd ManageDisks/packaging/arch
 makepkg -si
 ```
 
@@ -106,7 +106,7 @@ all dependencies; optional ones are listed as `optdepends`:
 sudo pacman -S --needed dosfstools exfatprogs ntfs-3g btrfs-progs xfsprogs f2fs-tools cryptsetup smartmontools udisks2
 ```
 
-* **Upgrade:** `cd managedisks/packaging/arch && makepkg -si` (it fetches the newest commit and rebuilds).
+* **Upgrade:** `cd ManageDisks/packaging/arch && makepkg -si` (it fetches the newest commit and rebuilds).
 * **Uninstall:** `sudo pacman -Rns managedisks-git`
 
 ### Debian, Ubuntu and derivatives
@@ -115,8 +115,8 @@ Linux Mint, Pop!_OS, elementary, Zorin, KDE neon. Needs Debian 12 / Ubuntu 22.04
 
 ```sh
 sudo apt install git make python3-pyqt6
-git clone https://github.com/oreo1298/managedisks.git
-cd managedisks
+git clone https://github.com/oreo1298/ManageDisks.git
+cd ManageDisks
 make deb
 sudo apt install ./managedisks_*_all.deb
 ```
@@ -130,8 +130,8 @@ Use `apt install ./file.deb`, not `dpkg -i`, so that apt pulls in the dependenci
 
 ```sh
 sudo dnf install git make rpm-build            # openSUSE: sudo zypper install git make rpm-build
-git clone https://github.com/oreo1298/managedisks.git
-cd managedisks
+git clone https://github.com/oreo1298/ManageDisks.git
+cd ManageDisks
 make rpm
 sudo dnf install ~/rpmbuild/RPMS/noarch/managedisks-*.noarch.rpm
 ```
@@ -172,7 +172,7 @@ security.polkit.enable = true;
 ```
 
 ```sh
-cd managedisks && python3 -m managedisks
+cd ManageDisks && python3 -m managedisks
 ```
 
 Without the polkit policy installed, the password prompt names `python3`

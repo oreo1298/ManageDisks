@@ -10,7 +10,7 @@ Version:        1.0.0
 Release:        1%{?dist}
 Summary:        Modern disk and partition manager
 License:        MIT
-URL:            https://github.com/oreo1298/managedisks
+URL:            https://github.com/oreo1298/ManageDisks
 Source0:        %{name}-%{version}.tar.gz
 BuildArch:      noarch
 
